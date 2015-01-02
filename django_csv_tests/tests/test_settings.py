@@ -16,7 +16,7 @@ DATABASES = {
     }
 }
 
-ROOT_URLCONF = 'django_client_data.tests.urls'
+ROOT_URLCONF = 'django_csv_tests.tests.urls'
 
 STATIC_URL = '/static/'
 
@@ -37,8 +37,8 @@ EXTERNAL_APPS = [
 ]
 
 INTERNAL_APPS = [
-    'django_client_data',
-    'django_client_data.tests.test_app',
+    'django_csv_tests',
+    'django_csv_tests.tests.test_app',
 ]
 
 INSTALLED_APPS = EXTERNAL_APPS + INTERNAL_APPS
@@ -51,7 +51,6 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-    'django_client_data.middleware.ClientDataMiddleware',
 )
 
 TEMPLATE_CONTEXT_PROCESSORS = (
@@ -62,5 +61,4 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     'django.core.context_processors.static',
     'django.core.context_processors.tz',
     'django.contrib.messages.context_processors.messages',
-    'django_client_data.context_processors.client_data',
 )

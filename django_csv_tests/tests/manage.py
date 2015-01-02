@@ -4,7 +4,7 @@ import sys
 
 if __name__ == "__main__":
     os.environ.setdefault('DJANGO_SETTINGS_MODULE',
-                          'django_client_data.tests.test_settings')
+                          'django_csv_tests.tests.test_settings')
 
     from django.core.management import execute_from_command_line
 
