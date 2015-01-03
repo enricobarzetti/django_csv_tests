@@ -32,6 +32,11 @@ Settings
 Mechanism
 ---------
 
+Todo
+----
+
+- Implement log in and log out features.
+- Implement "expect context", "expect session", and "expect" directives.
 
 Run Tests
 ---------
