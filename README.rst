@@ -1,7 +1,7 @@
 Django CSV Tests
 ================
 
-This allows you to define Django units tests using requests to the Django testing client in a spreadsheet format.  Inspired by Robot Framework.
+This allows you to use a spreadsheet to define Django units tests that make requests to the Django testing client.  Inspired by Robot Framework.
 
 Installation
 ------------

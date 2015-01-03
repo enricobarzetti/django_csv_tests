@@ -7,7 +7,7 @@ import re
 from django.http import QueryDict
 from django.utils.unittest import expectedFailure
 
-__version__ = '0.1.0'
+__version__ = '0.1.1'
 
 safe_chars = re.compile(r'[\W_]', re.MULTILINE)
 

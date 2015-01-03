@@ -16,7 +16,7 @@ def read(fname):
 setup(
     name='django_csv_tests',
     version=app.__version__,
-    description='This allows you to define Django units tests using requests to the Django testing client in a spreadsheet format.',
+    description='This allows you to use a spreadsheet to define Django units tests that make requests to the Django testing client.',
     long_description=read('README.rst'),
     license='The MIT License',
     platforms=['OS Independent'],
