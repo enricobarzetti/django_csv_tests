@@ -18,18 +18,18 @@ def python_safe(s):
     return '_'.join(s)
 
 
-class TestRequest(object):
+class PreparedRequest(object):
     def __init__(self, test_class, request_description):
         self.test_class = test_class
         self.request_description = request_description
 
-    def __call__(self, *args, **kwargs):
+    def __call__(self):
         # Use test_description to make assertions
         response = self.make_request()
         self.expect_status(response)
         self.expect_header(response)
-        self.expect_context()
-        self.expect()
+        # self.expect_context()
+        # self.expect()
 
     def make_request(self):
         url = self.get_url()
@@ -63,41 +63,73 @@ class TestRequest(object):
         eval(self.request_description['expect'])
 
 
-def csv_to_tests(csv_path):
+class PreparedTest(object):
+    def __init__(self, test_class, row_num, rows_for_test):
+        self.test_class = test_class
+        self.row_num = row_num
+        self.rows_for_test = rows_for_test
+
+        test_level_attributes = self.get_test_level_attributes()
+        self.test_name = test_level_attributes['test name']
+        self.expect_failure = test_level_attributes['expect failure']
+        self.prepared_requests = self.make_prepared_requests()
+
+    def get_test_level_attributes(self):
+        return {
+            'test name': self.rows_for_test[0]['test name'],
+            'expect failure': self.rows_for_test[0]['expect failure'],
+        }
+
+    def make_prepared_requests(self):
+        prepared_requests = []
+        for request_description in self.rows_for_test:
+            prepared_request = PreparedRequest(self.test_class,
+                                               request_description)
+            prepared_requests.append(prepared_request)
+        return prepared_requests
+
+    def make_test_method(self):
+        def test_func(self):
+            for prepared_request in self.prepared_requests:
+                prepared_request()
+
+        if self.expect_failure:
+            test_func = expectedFailure(test_func)
+
+        test_name = 'csv_test_{}_{}'.format(self.row_num,
+                                            python_safe(self.test_name))
+        test_func.__name__ = test_name
+        test_func.funcname = test_name
+
+        return test_func
+
+
+def group_by_tests(reader):
+    ret = []
+    for index, row in enumerate(reader):
+        row_num = index + 1 + 1
+        # Look at the next row to see if it is of the same test
+        if not row['test name']:
+            ret[-1][-1].append(row)
+        else:
+            new_test = [row]
+            ret.append([row_num, new_test])
+    return ret
+
+
+def csv_to_tests(csv_path, test_class):
+    prepared_tests = []
     with open(csv_path, 'rU') as f:
-        reader = csv.reader(f)
+        reader = csv.DictReader(f)
+        for row_num, rows_for_test in group_by_tests(reader):
+            prepared_test = PreparedTest(test_class, row_num, rows_for_test)
+            prepared_tests.append(prepared_test)
 
-        # Skip first header row
-        reader.next()
-
-        row_num = 2
-    return []
-
-
-def make_test(test_class,  test_description):
-    test_requests = []
-    # test_description is a list of dictionaries
-    for request_description in test_description:
-        test_request = TestRequest(test_class, request_description)
-        test_requests.append(test_request)
-
-    def test_func():
-        for test_request in test_requests:
-            test_request()
-    test_name = 'csv_test_{}_{}'.format(
-        test_description['row_num'], python_safe(test_description['test_name']))
-    test_func.__name__ = test_name
-    test_func.funcname = test_name
-
-    if test_description[0]['expect failure']:
-        test_func = expectedFailure(test_func)
-    return test_func
+    return prepared_tests
 
 
 def generate_tests(csv_path, test_class):
-    test_descriptions = csv_to_tests(csv_path)
-    for test_description in test_descriptions:
-        test_func = make_test(test_class, test_description)
+    prepared_tests = csv_to_tests(csv_path, test_class)
+    for prepared_test in prepared_tests:
+        test_func = prepared_test.make_test_method()
         setattr(test_class, test_func.__name__, test_func)
-
-
