@@ -1,0 +1,1 @@
+test name,expect failure,login as,url,method,querystring,post body,variables,expect status,expect header,expect context,expectindex requires login,,anonymous,/,GET,,,,302,"{""Location"": ""http://testserver/accounts/login/?next=/""}",,

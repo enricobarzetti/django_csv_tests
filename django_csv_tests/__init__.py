@@ -1,7 +1,8 @@
-import csv
-import re
 from urlparse import urlparse
 from urlparse import urlunparse
+import csv
+import json
+import re
 
 from django.http import QueryDict
 from django.utils.unittest import expectedFailure
@@ -21,23 +22,34 @@ def python_safe(s):
 class PreparedRequest(object):
     def __init__(self, test_class, request_description):
         self.test_class = test_class
-        self.request_description = request_description
+        self.request_description = self.validate(request_description)
 
-    def __call__(self):
+    def __call__(self, test_case_instance):
         # Use test_description to make assertions
-        response = self.make_request()
-        self.expect_status(response)
-        self.expect_header(response)
+        response = self.make_request(test_case_instance.client)
+        self.expect_status(test_case_instance, response)
+        self.expect_header(test_case_instance, response)
         # self.expect_context()
         # self.expect()
 
-    def make_request(self):
+    def validate(self, request_description):
+        ret = request_description
+        ret['method'] = ret['method'].lower()
+        ret['querystring'] = (json.loads(ret['querystring'])
+                              if ret['querystring'] else {})
+        ret['post body'] = (json.loads(ret['post body'])
+                            if ret['post body'] else {})
+        ret['expect status'] = int(ret['expect status'])
+        ret['expect header'] = (json.loads(ret['expect header'])
+                                if ret['expect header'] else {})
+        return ret
+
+    def make_request(self, client):
         url = self.get_url()
         if self.request_description['method'] == 'get':
-            response = self.test_class.client.get(url)
+            response = client.get(url)
         elif self.request_description['method'] == 'post':
-            response = self.test_class.client.post(
-                url, self.request_description['post body'])
+            response = client.post(url, self.request_description['post body'])
         return response
 
     def get_url(self):
@@ -48,13 +60,13 @@ class PreparedRequest(object):
         path_parts[4] = querystring.urlencode(safe='/')
         return urlunparse(path_parts)
 
-    def expect_status(self, response):
-        self.test_class.assertEqual(self.request_description['expect status'],
-                                    response.status)
+    def expect_status(self, test_case_instance, response):
+        test_case_instance.assertEqual(
+            self.request_description['expect status'], response.status_code)
 
-    def expect_header(self, response):
+    def expect_header(self, test_case_instance, response):
         for k, v in self.request_description['expect header'].items():
-            self.test_class.assertEqual(v, response.items()[k])
+            test_case_instance.assertEqual(v, response[k])
 
     def expect_context(self):
         eval(self.request_description['expect context'])
@@ -72,12 +84,13 @@ class PreparedTest(object):
         test_level_attributes = self.get_test_level_attributes()
         self.test_name = test_level_attributes['test name']
         self.expect_failure = test_level_attributes['expect failure']
+
         self.prepared_requests = self.make_prepared_requests()
 
     def get_test_level_attributes(self):
         return {
             'test name': self.rows_for_test[0]['test name'],
-            'expect failure': self.rows_for_test[0]['expect failure'],
+            'expect failure': bool(self.rows_for_test[0]['expect failure']),
         }
 
     def make_prepared_requests(self):
@@ -89,14 +102,14 @@ class PreparedTest(object):
         return prepared_requests
 
     def make_test_method(self):
-        def test_func(self):
+        def test_func(the_self):
             for prepared_request in self.prepared_requests:
-                prepared_request()
+                prepared_request(the_self)
 
         if self.expect_failure:
             test_func = expectedFailure(test_func)
 
-        test_name = 'csv_test_{}_{}'.format(self.row_num,
+        test_name = 'test_csv_{}_{}'.format(self.row_num,
                                             python_safe(self.test_name))
         test_func.__name__ = test_name
         test_func.funcname = test_name

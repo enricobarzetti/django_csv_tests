@@ -1,5 +1,8 @@
-from django.views.generic import TemplateView
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render
 
 
-class IndexView(TemplateView):
-    template_name = 'index.html'
+@login_required
+def index(request):
+    context = {}
+    return render(request, 'index.html', context)
