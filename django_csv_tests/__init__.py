@@ -21,7 +21,6 @@ def python_safe(s):
 
 class PreparedRequest(object):
     def __init__(self, test_class, request_description):
-        self.test_class = test_class
         self.request_description = self.validate(request_description)
 
     def __call__(self, test_case_instance):
@@ -76,8 +75,7 @@ class PreparedRequest(object):
 
 
 class PreparedTest(object):
-    def __init__(self, test_class, row_num, rows_for_test):
-        self.test_class = test_class
+    def __init__(self, row_num, rows_for_test):
         self.row_num = row_num
         self.rows_for_test = rows_for_test
 
@@ -96,8 +94,7 @@ class PreparedTest(object):
     def make_prepared_requests(self):
         prepared_requests = []
         for request_description in self.rows_for_test:
-            prepared_request = PreparedRequest(self.test_class,
-                                               request_description)
+            prepared_request = PreparedRequest(request_description)
             prepared_requests.append(prepared_request)
         return prepared_requests
 
@@ -135,7 +132,7 @@ def csv_to_tests(csv_path, test_class):
     with open(csv_path, 'rU') as f:
         reader = csv.DictReader(f)
         for row_num, rows_for_test in group_by_tests(reader):
-            prepared_test = PreparedTest(test_class, row_num, rows_for_test)
+            prepared_test = PreparedTest(row_num, rows_for_test)
             prepared_tests.append(prepared_test)
 
     return prepared_tests
