@@ -28,11 +28,15 @@ class PreparedRequest(object):
         response = self.make_request(test_case_instance.client)
         self.expect_status(test_case_instance, response)
         self.expect_header(test_case_instance, response)
+        # TODO: Not yet implemented
         # self.expect_context()
         # self.expect()
 
     def validate(self, request_description):
         ret = request_description
+        ret['login as'] = (json.loads(ret['login as'])
+                           if ret['login as'] else {})
+        ret['url'] = ret['url']
         ret['method'] = ret['method'].lower()
         ret['querystring'] = (json.loads(ret['querystring'])
                               if ret['querystring'] else {})
@@ -44,11 +48,17 @@ class PreparedRequest(object):
         return ret
 
     def make_request(self, client):
+        if self.request_description['login as']:
+            client.login(**self.request_description['login as'])
+
         url = self.get_url()
         if self.request_description['method'] == 'get':
             response = client.get(url)
         elif self.request_description['method'] == 'post':
             response = client.post(url, self.request_description['post body'])
+
+        if self.request_description['login as']:
+            client.logout()
         return response
 
     def get_url(self):
