@@ -20,7 +20,7 @@ def python_safe(s):
 
 
 class PreparedRequest(object):
-    def __init__(self, test_class, request_description):
+    def __init__(self, request_description):
         self.request_description = self.validate(request_description)
 
     def __call__(self, test_case_instance):
