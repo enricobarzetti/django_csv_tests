@@ -96,7 +96,7 @@ post body
 ~~~~~~~~~
 
 A JSON encoded string that contains data to submit in a POST request.  This is
-used only if the method is POST.
+used only if the method is POST.  This becomes ``request.POST``.
 
 expect status
 ~~~~~~~~~~~~~
