@@ -113,7 +113,23 @@ response.  Example: A redirect response could have the header
 Todo
 ----
 
-- Implement "expect context", "expect session", and "expect" directives.
+- Implement "variables", "expect context", and "expect" directives.
+
+Variables
+=========
+
+"user_id = self.user.pk
+expected = {""__all__"": ""Passwords did not match""}"
+
+Expect context
+==============
+
+form.errors == expected
+
+Expect
+======
+
+len(response.content) == 2000
 
 Run Tests
 ---------
