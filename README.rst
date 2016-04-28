@@ -118,18 +118,25 @@ Todo
 Variables
 +++++++++
 
-"user_id = self.user.pk
-expected = {""__all__"": ""Passwords did not match""}"
+.. code-block:: python
+
+    "user_id = self.user.pk
+    expected = {""__all__"": ""Passwords did not match""}"
+
 
 Expect context
 ++++++++++++++
 
-form.errors == expected
+.. code-block:: python
+
+    form.errors == expected
 
 Expect
 ++++++
 
-len(response.content) == 2000
+.. code-block:: python
+
+    len(response.content) == 2000
 
 Run Tests
 ---------
