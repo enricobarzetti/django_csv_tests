@@ -1,4 +1,4 @@
-Django==1.6
+Django==1.11.29
 ipython==2.0.0
 gnureadline==6.3.3
 pudb==2014.1
