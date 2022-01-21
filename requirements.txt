@@ -1,4 +1,4 @@
 Django==1.6
-ipython==2.0.0
+ipython==7.16.3
 gnureadline==6.3.3
 pudb==2014.1
